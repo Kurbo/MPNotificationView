@@ -7,57 +7,21 @@
 //
 
 #import "MPNotificationView.h"
-#import "OBGradientView.h"
 
-#define kMPNotificationHeight_IOS_6    40.0f
-#define kMPNotificationHeight_IOS_7    60.0f
+#define kMPNotificationHeight    60.0f
 
 #define kMPNotificationIPadWidth 480.0f
 #define RADIANS(deg) ((deg) * M_PI / 180.0f)
 
-#ifndef kCFCoreFoundationVersionNumber_IOS_7_0
-#define kCFCoreFoundationVersionNumber_IOS_7_0 838.00
-#endif
-
-// Adapted from https://gist.github.com/steipete/6526860
-BOOL MPNotificationIsUIKitFlatMode(void) {
-    static BOOL isUIKitFlatMode = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_IOS_7_0) {
-            
-            
-            // If your app is running in legacy mode, tintColor will be nil - else it must be set to some color.
-            if (UIApplication.sharedApplication.keyWindow) {
-                isUIKitFlatMode = [UIApplication.sharedApplication.keyWindow performSelector:@selector(tintColor)] != nil;
-            }else {
-                // Possible that we're called early on (e.g. when used in a Storyboard). Adapt and use a temporary window.
-                isUIKitFlatMode = [[UIWindow new] performSelector:@selector(tintColor)] != nil;
-            }
-        }
-    });
-    return isUIKitFlatMode;
-}
-
 static NSMutableDictionary * _registeredTypes;
 
 static CGFloat notificationHeight() {
-    CGFloat height;
-    if (MPNotificationIsUIKitFlatMode()) {
-        height = kMPNotificationHeight_IOS_7;
-    }
-    else {
-        height = kMPNotificationHeight_IOS_6;
-    }
-    
+    CGFloat height = kMPNotificationHeight;
     return height;
-    
 }
 
 static CGRect notificationRect()
 {
-
-
     if (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
     {
         return CGRectMake(0.0f, 0.0f,
@@ -68,11 +32,7 @@ static CGRect notificationRect()
     return CGRectMake(0.0f, 0.0f,
                       [UIScreen mainScreen].bounds.size.width,
                       notificationHeight());
-
 }
-
-
-
 
 NSString *kMPNotificationViewTapReceivedNotification = @"kMPNotificationViewTapReceivedNotification";
 
@@ -100,20 +60,6 @@ NSString *kMPNotificationViewTapReceivedNotification = @"kMPNotificationViewTapR
         self.windowLevel = UIWindowLevelStatusBar + 1;
         self.backgroundColor = [UIColor clearColor];
         _notificationQueue = [[NSMutableArray alloc] initWithCapacity:4];
-        
-        if (!MPNotificationIsUIKitFlatMode()) {
-            UIView *topHalfBlackView = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMinX(frame),
-                                                                                CGRectGetMinY(frame),
-                                                                                CGRectGetWidth(frame),
-                                                                                0.5 * CGRectGetHeight(frame))];
-            
-            topHalfBlackView.backgroundColor = [UIColor blackColor];
-            topHalfBlackView.layer.zPosition = -100;
-            topHalfBlackView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            
-            [self addSubview:topHalfBlackView];
-
-        }
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(willRotateScreen:)
@@ -251,51 +197,23 @@ static CGFloat const __imagePadding = 8.0f;
         
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
-        if (MPNotificationIsUIKitFlatMode()) {
-//            CGRect bgRect = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height+2);
-            UIToolbar * toolbar = [[UIToolbar alloc] initWithFrame:self.bounds];
-            
-            toolbar.barTintColor = [UIColor blackColor];
-            _contentView = toolbar;
-        }
-        else {
-            OBGradientView * gradientView = [[OBGradientView alloc] initWithFrame:self.bounds];
-            
-            gradientView.colors = @[(id)[[UIColor colorWithWhite:0.99f alpha:1.0f] CGColor],
-                                    (id)[[UIColor colorWithWhite:0.9f  alpha:1.0f] CGColor]];
-            
-            gradientView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-            gradientView.layer.cornerRadius = 8.0f;
-            gradientView.clipsToBounds = YES;
-            
-            _contentView = gradientView;
-        }
+        UIToolbar * toolbar = [[UIToolbar alloc] initWithFrame:self.bounds];
+        
+        toolbar.barTintColor = [UIColor blackColor];
+        _contentView = toolbar;
         [self addSubview:_contentView];
             
         CGFloat imageViewEdgeLength;
         CGFloat imageCornerRoundness;
-        if (MPNotificationIsUIKitFlatMode()) {
-            imageViewEdgeLength = 20;
-            imageCornerRoundness = 3;
-        }
-        else {
-            imageViewEdgeLength = 28;
-            imageCornerRoundness = 4;
-        }
+        imageViewEdgeLength = 20;
+        imageCornerRoundness = 3;
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(6, 6, imageViewEdgeLength, imageViewEdgeLength)];
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
         _imageView.layer.cornerRadius = imageCornerRoundness;
         _imageView.clipsToBounds = YES;
         [self addSubview:_imageView];
         
-        UIColor * textColor;
-        
-        if (MPNotificationIsUIKitFlatMode()) {
-            textColor = [UIColor whiteColor];
-        }
-        else {
-            textColor = [UIColor blackColor];
-        }
+        UIColor *textColor = [UIColor whiteColor];
         
         UIFont *textFont = [UIFont boldSystemFontOfSize:14.0f];
         CGRect textFrame = CGRectMake(__imagePadding + CGRectGetMaxX(_imageView.frame),
@@ -325,17 +243,6 @@ static CGFloat const __imagePadding = 8.0f;
         _detailTextLabel.backgroundColor = [UIColor clearColor];
         _detailTextLabel.textColor = textColor;
         [_contentView addSubview:_detailTextLabel];
-        
-        if (!MPNotificationIsUIKitFlatMode()) {
-            UIView *bottomLine = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMinX(frame),
-                                                                          CGRectGetHeight(frame) - 1.0f,
-                                                                          CGRectGetWidth(frame),
-                                                                          1.0f)];
-            bottomLine.backgroundColor = [UIColor colorWithWhite:0.92 alpha:1.0];
-            
-            [_contentView addSubview:bottomLine];
-
-        }
     }
     
     return self;
@@ -487,97 +394,6 @@ static CGFloat const __imagePadding = 8.0f;
     [MPNotificationView showNextNotification];
 }
 
-+ (void) performIOS6Rotation {
-    UIView *viewToRotateOut = nil;
-    UIImage *screenshot = [self screenImageWithRect:__notificationWindow.frame];
-    
-    if (__notificationWindow.currentNotification)
-    {
-        viewToRotateOut = __notificationWindow.currentNotification;
-    }
-    else
-    {
-        viewToRotateOut = [[UIImageView alloc] initWithFrame:__notificationWindow.bounds];
-        ((UIImageView *)viewToRotateOut).image = screenshot;
-        [__notificationWindow addSubview:viewToRotateOut];
-        __notificationWindow.hidden = NO;
-    }
-    
-    UIView *viewToRotateIn = nil;
-    
-    if ([__notificationWindow.notificationQueue count] > 0)
-    {
-        viewToRotateIn = __notificationWindow.notificationQueue[0];
-    }
-    else
-    {
-        viewToRotateIn = [[UIImageView alloc] initWithFrame:__notificationWindow.bounds];
-        ((UIImageView *)viewToRotateIn).image = screenshot;
-    }
-    
-    viewToRotateIn.layer.anchorPointZ = 11.547f;
-    viewToRotateIn.layer.doubleSided = NO;
-    viewToRotateIn.layer.zPosition = 2;
-    
-    CATransform3D viewInStartTransform = CATransform3DMakeRotation(RADIANS(-120), 1.0, 0.0, 0.0);
-    viewInStartTransform.m34 = -1.0 / 200.0;
-    
-    viewToRotateOut.layer.anchorPointZ = 11.547f;
-    viewToRotateOut.layer.doubleSided = NO;
-    viewToRotateOut.layer.zPosition = 2;
-    
-    CATransform3D viewOutEndTransform = CATransform3DMakeRotation(RADIANS(120), 1.0, 0.0, 0.0);
-    viewOutEndTransform.m34 = -1.0 / 200.0;
-    
-    [__notificationWindow addSubview:viewToRotateIn];
-    __notificationWindow.backgroundColor = [UIColor blackColor];
-    
-    viewToRotateIn.layer.transform = viewInStartTransform;
-    
-    if ([viewToRotateIn isKindOfClass:[MPNotificationView class]] )
-    {
-        UIImageView *bgImage = [[UIImageView alloc] initWithFrame:__notificationWindow.bounds];
-        bgImage.image = screenshot;
-        [viewToRotateIn addSubview:bgImage];
-        [viewToRotateIn sendSubviewToBack:bgImage];
-        __notificationWindow.currentNotification = viewToRotateIn;
-    }
-    
-    [UIView animateWithDuration:0.5
-                          delay:0.0
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-                         viewToRotateIn.layer.transform = CATransform3DIdentity;
-                         viewToRotateOut.layer.transform = viewOutEndTransform;
-                     }
-                     completion:^(BOOL finished) {
-                         [viewToRotateOut removeFromSuperview];
-                         [__notificationWindow.notificationQueue removeObject:viewToRotateOut];
-                         if ([viewToRotateIn isKindOfClass:[MPNotificationView class]])
-                         {
-                             MPNotificationView *notification = (MPNotificationView*)viewToRotateIn;
-                             
-                             if (notification.duration > 0.0)
-                             {
-                                 [self performSelector:@selector(showNextNotification)
-                                            withObject:nil
-                                            afterDelay:notification.duration];
-                             }
-                             
-                             __notificationWindow.currentNotification = notification;
-                             [__notificationWindow.notificationQueue removeObject:notification];
-                         }
-                         else
-                         {
-                             [viewToRotateIn removeFromSuperview];
-                             __notificationWindow.hidden = YES;
-                             __notificationWindow.currentNotification = nil;
-                         }
-                         
-                         __notificationWindow.backgroundColor = [UIColor clearColor];
-                     }];
-}
-
 + (void) performIOS7Slide {
     UIView * viewToSlideIn = nil;
     
@@ -648,12 +464,7 @@ static CGFloat const __imagePadding = 8.0f;
                                              selector:@selector(showNextNotification)
                                                object:nil];
     
-    if (MPNotificationIsUIKitFlatMode()) {
-        [self performIOS7Slide];
-    }
-    else {
-        [self performIOS6Rotation];
-    }
+    [self performIOS7Slide];
 }
 
 + (UIImage *) screenImageWithRect:(CGRect)rect
