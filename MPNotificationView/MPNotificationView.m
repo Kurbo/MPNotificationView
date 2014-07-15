@@ -453,6 +453,7 @@ static CGFloat const __imagePadding = 8.0f;
                          }
                          completion:^(BOOL finished) {
                              [oldNotification removeFromSuperview];
+                             __notificationWindow.hidden = YES;
                              __notificationWindow.currentNotification = nil;
                          }];
     }
