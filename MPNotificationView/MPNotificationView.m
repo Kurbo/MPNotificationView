@@ -405,6 +405,7 @@ static CGFloat const __imagePadding = 8.0f;
 
     
     if (viewToSlideIn) {
+        __notificationWindow.hidden = NO;
         viewToSlideIn.frame = CGRectOffset(notificationRect(), 0, -notificationHeight());
         
         [__notificationWindow addSubview:viewToSlideIn];
