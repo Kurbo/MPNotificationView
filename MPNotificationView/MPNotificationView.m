@@ -42,6 +42,7 @@ NSString *kMPNotificationViewTapReceivedNotification = @"kMPNotificationViewTapR
 
 @property (nonatomic, strong) NSMutableArray *notificationQueue;
 @property (nonatomic, strong) UIView *currentNotification;
+@property (nonatomic, strong) UIView *slidingInView;
 
 @end
 
@@ -402,48 +403,49 @@ static CGFloat const __imagePadding = 8.0f;
         viewToSlideIn = __notificationWindow.notificationQueue[0];
     }
     
+    if (viewToSlideIn)
+    {
+        // Make sure that the view in the front of the queue is not the same
+        // as the one is performing the slide in animation
+        if (viewToSlideIn !=  __notificationWindow.slidingInView)
+        {
+            __notificationWindow.slidingInView = viewToSlideIn;
 
-    
-    if (viewToSlideIn) {
-        __notificationWindow.hidden = NO;
-        viewToSlideIn.frame = CGRectOffset(notificationRect(), 0, -notificationHeight());
-        
-        [__notificationWindow addSubview:viewToSlideIn];
-        
-        
-        UIView * viewToSlideOut = nil;
-        
-        if (__notificationWindow.currentNotification) {
-            viewToSlideOut = __notificationWindow.currentNotification;
-        }
-        
-        [UIView animateWithDuration:0.5
-                         animations:^{
-
-                             viewToSlideIn.frame = notificationRect();
-                             
-                             viewToSlideOut.clipsToBounds = YES;
-                             viewToSlideOut.layer.bounds = CGRectMake(0, 0, viewToSlideOut.bounds.size.width, 0);
-                             viewToSlideOut.layer.position = CGPointMake(viewToSlideOut.bounds.size.width/2, notificationHeight());
-                             for (UIView * view in viewToSlideOut.subviews) {
-                                 view.frame = CGRectOffset(view.frame, 0, -notificationHeight());
+            __notificationWindow.hidden = NO;
+            viewToSlideIn.frame = CGRectOffset(notificationRect(), 0, -notificationHeight());
+            
+            [__notificationWindow addSubview:viewToSlideIn];
+            
+            
+            UIView * viewToSlideOut = nil;
+            
+            if (__notificationWindow.currentNotification)
+            {
+                viewToSlideOut = __notificationWindow.currentNotification;
+            }
+            
+            [UIView animateWithDuration:0.5
+                             animations:^{
+                                 viewToSlideIn.frame = notificationRect();
+                                 viewToSlideOut.clipsToBounds = YES;
+                                 viewToSlideOut.layer.bounds = CGRectMake(0, 0, viewToSlideOut.bounds.size.width, 0);
+                                 viewToSlideOut.layer.position = CGPointMake(viewToSlideOut.bounds.size.width/2, notificationHeight());
+                                 for (UIView * view in viewToSlideOut.subviews)
+                                 {
+                                     view.frame = CGRectOffset(view.frame, 0, -notificationHeight());
+                                 }
                              }
-                         }
-                         completion:^(BOOL finished) {
-                             MPNotificationView *notification = (MPNotificationView*)viewToSlideIn;
-                             
-                             if (notification.duration > 0.0)
-                             {
+                             completion:^(BOOL finished) {
+                                 MPNotificationView *notification = (MPNotificationView*)viewToSlideIn;
+                                 __notificationWindow.slidingInView = nil;
+                                 [__notificationWindow.currentNotification removeFromSuperview];
+                                 __notificationWindow.currentNotification = notification;
+                                 [__notificationWindow.notificationQueue removeObject:notification];
                                  [self performSelector:@selector(showNextNotification)
                                             withObject:nil
                                             afterDelay:notification.duration];
-                             }
-                             
-                             [__notificationWindow.currentNotification removeFromSuperview];
-                             __notificationWindow.currentNotification = notification;
-                             [__notificationWindow.notificationQueue removeObject:notification];
-
-                         }];
+                             }];
+        }
     }
     else if(__notificationWindow.currentNotification) {
         UIView * oldNotification = __notificationWindow.currentNotification;
