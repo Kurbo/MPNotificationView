@@ -209,14 +209,14 @@ static CGFloat const __imagePadding = 8.0f;
         imageViewEdgeLength = 20;
         imageCornerRoundness = 3;
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(6, 6, imageViewEdgeLength, imageViewEdgeLength)];
-        _imageView.contentMode = UIViewContentModeScaleAspectFill;
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
         _imageView.layer.cornerRadius = imageCornerRoundness;
         _imageView.clipsToBounds = YES;
         [self addSubview:_imageView];
         
         UIColor *textColor = [UIColor whiteColor];
         
-        UIFont *textFont = [UIFont boldSystemFontOfSize:14.0f];
+        UIFont *textFont = [UIFont boldSystemFontOfSize:13.0f];
         CGRect textFrame = CGRectMake(__imagePadding + CGRectGetMaxX(_imageView.frame),
                                       2,
                                       notificationWidth - __imagePadding * 2 - CGRectGetMaxX(_imageView.frame),
