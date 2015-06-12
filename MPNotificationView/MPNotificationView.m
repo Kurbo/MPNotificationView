@@ -357,9 +357,16 @@ static CGFloat const __imagePadding = 8.0f;
     notification.duration = duration;
     notification.tapBlock = block;
     
+    UISwipeGestureRecognizer *swipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:notification action:@selector(handleSwipe)];
+    swipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
+    swipeGesture.delegate = notification;
+    [notification addGestureRecognizer:swipeGesture];
+  
     UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:notification
-                                                                         action:@selector(handleTap:)];
-    notification.tapGestureRecognizer = gr;
+                                                                       action:@selector(handleTap:)];
+    [gr requireGestureRecognizerToFail:swipeGesture];
+    [gr setDelaysTouchesBegan:YES];
+    gr.delegate = notification;
     [notification addGestureRecognizer:gr];
     
     [__notificationWindow.notificationQueue addObject:notification];
@@ -398,6 +405,21 @@ static CGFloat const __imagePadding = 8.0f;
     
     [MPNotificationView showNextNotification];
 }
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
+    return YES;
+  }
+  if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]]) {
+    return YES;
+  }
+  return NO;
+}
+
+- (void)handleSwipe{
+  [MPNotificationView showNextNotification];
+}
+
 
 + (void) showNextNotification
 {
