@@ -15,7 +15,7 @@ extern NSString *kMPNotificationViewTapReceivedNotification;
 
 typedef void (^MPNotificationSimpleAction)(MPNotificationView * view);
 
-@interface MPNotificationView : UIView
+@interface MPNotificationView : UIView <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) IBOutlet UILabel *textLabel;
 @property (nonatomic, strong) IBOutlet UILabel *detailTextLabel;
