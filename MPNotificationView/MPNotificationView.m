@@ -10,7 +10,8 @@
 #import "OBGradientView.h"
 
 #define kMPNotificationHeight    40.0f
-#define kMPNotificationIPadWidth 480.0f
+#define kMPNotificationIPadWidth [UIScreen mainScreen].bounds.size.width
+// #define kMPNotificationIPadWidth 480.0f
 #define RADIANS(deg) ((deg) * M_PI / 180.0f)
 
 static NSMutableDictionary * _registeredTypes;
@@ -208,7 +209,7 @@ static CGFloat const __imagePadding = 8.0f;
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
         
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(6, 6, 28, 28)];
+        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 200 : 6, 6, 28, 28)];
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
         _imageView.layer.cornerRadius = 4.0f;
         _imageView.clipsToBounds = YES;
