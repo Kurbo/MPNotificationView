@@ -10,7 +10,8 @@
 
 #define kMPNotificationHeight    60.0f
 
-#define kMPNotificationIPadWidth 480.0f
+// #define kMPNotificationIPadWidth 480.0f
+#define kMPNotificationIPadWidth [UIScreen mainScreen].bounds.size.width
 #define RADIANS(deg) ((deg) * M_PI / 180.0f)
 
 static NSMutableDictionary * _registeredTypes;
@@ -208,7 +209,7 @@ static CGFloat const __imagePadding = 8.0f;
         CGFloat imageCornerRoundness;
         imageViewEdgeLength = 20;
         imageCornerRoundness = 3;
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(6, 6, imageViewEdgeLength, imageViewEdgeLength)];
+        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 200 : 6, 6, imageViewEdgeLength, imageViewEdgeLength)];
         _imageView.contentMode = UIViewContentModeScaleAspectFit;
         _imageView.layer.cornerRadius = imageCornerRoundness;
         _imageView.clipsToBounds = YES;
