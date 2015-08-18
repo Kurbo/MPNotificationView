@@ -13,6 +13,8 @@
 // #define kMPNotificationIPadWidth 480.0f
 #define kMPNotificationIPadWidth [UIScreen mainScreen].bounds.size.width
 #define RADIANS(deg) ((deg) * M_PI / 180.0f)
+static CGFloat const kMPHandleWidth = 30.0f;
+static CGFloat const kMPHandleHeight = 4.0f;
 
 static NSMutableDictionary * _registeredTypes;
 
@@ -245,6 +247,14 @@ static CGFloat const __imagePadding = 8.0f;
         _detailTextLabel.backgroundColor = [UIColor clearColor];
         _detailTextLabel.textColor = textColor;
         [_contentView addSubview:_detailTextLabel];
+       
+        UIView *handle = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetWidth(frame) / 2 - kMPHandleWidth / 2,
+                                                                 CGRectGetHeight(frame) - 2 * kMPHandleHeight,
+                                                                 kMPHandleWidth,
+                                                                 kMPHandleHeight)];
+        handle.backgroundColor = [UIColor colorWithWhite:0.8 alpha:0.9];
+        handle.layer.cornerRadius = kMPHandleHeight / 2;
+        [_contentView addSubview:handle];
     }
     
     return self;
