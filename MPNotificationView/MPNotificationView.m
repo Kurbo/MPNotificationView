@@ -19,14 +19,14 @@ static CGFloat const kMPHandleHeight = 4.0f;
 
 static NSMutableDictionary * _registeredTypes;
 
-static CGFloat notificationHeight() {
+static Boolean isIphoneX() {
+    return UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad && CGRectGetHeight([[UIScreen mainScreen] bounds]) == 812;
+}
 
-    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad && CGRectGetHeight([[UIScreen mainScreen] bounds]) == 812) {
-        return kMPNotificationHeightIphoneX;
-    } else {
-        CGFloat height = kMPNotificationHeight;
-        return height;
-    }
+static CGFloat notificationHeight() {
+    
+    CGFloat height = isIphoneX() ? kMPNotificationHeightIphoneX : kMPNotificationHeight;
+    return height;
 }
 
 static CGRect notificationRect()
@@ -217,7 +217,7 @@ static CGFloat const __imagePadding = 8.0f;
         CGFloat imageCornerRoundness;
         imageViewEdgeLength = 20;
         imageCornerRoundness = 3;
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 200 : 6, 6, imageViewEdgeLength, imageViewEdgeLength)];
+       _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 200 : 6, isIphoneX() ? 50 : 6, imageViewEdgeLength, imageViewEdgeLength)];
         _imageView.contentMode = UIViewContentModeScaleAspectFit;
         _imageView.layer.cornerRadius = imageCornerRoundness;
         _imageView.clipsToBounds = YES;
@@ -227,7 +227,7 @@ static CGFloat const __imagePadding = 8.0f;
         
         UIFont *textFont = [UIFont boldSystemFontOfSize:13.0f];
         CGRect textFrame = CGRectMake(__imagePadding + CGRectGetMaxX(_imageView.frame),
-                                      2,
+                                      isIphoneX() ? 46 : 2,
                                       notificationWidth - __imagePadding * 2 - CGRectGetMaxX(_imageView.frame),
                                       textFont.lineHeight);
         _textLabel = [[UILabel alloc] initWithFrame:textFrame];
