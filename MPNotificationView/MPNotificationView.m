@@ -9,6 +9,7 @@
 #import "MPNotificationView.h"
 
 #define kMPNotificationHeight    60.0f
+#define kMPNotificationHeightIphoneX    100.0f
 
 // #define kMPNotificationIPadWidth 480.0f
 #define kMPNotificationIPadWidth [UIScreen mainScreen].bounds.size.width
@@ -19,8 +20,13 @@ static CGFloat const kMPHandleHeight = 4.0f;
 static NSMutableDictionary * _registeredTypes;
 
 static CGFloat notificationHeight() {
-    CGFloat height = kMPNotificationHeight;
-    return height;
+
+    if (UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad && CGRectGetHeight([[UIScreen mainScreen] bounds]) == 812) {
+        return kMPNotificationHeightIphoneX;
+    } else {
+        CGFloat height = kMPNotificationHeight;
+        return height;
+    }
 }
 
 static CGRect notificationRect()
